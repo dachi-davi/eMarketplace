@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eMarketplace - Item Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800">
+
+<nav class="bg-white border-b border-gray-100 h-16 flex items-center">
+    <div class="max-w-5xl mx-auto px-4 w-full flex items-center">
+        <a href="index.html" class="text-sm font-medium text-gray-500 hover:text-indigo-600 transition flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7 m0 0l7-7 m-7 7h18"></path></svg>
+            Back to Listings
+        </a>
+    </div>
+</nav>
+
+<main class="max-w-5xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm">
+
+        <div class="aspect-[4/3] rounded-2xl bg-gray-50 overflow-hidden border border-gray-100">
+            <img id="item-photo" src="" alt="Listing Item" class="w-full h-full object-cover opacity-0 transition-opacity duration-300">
+        </div>
+
+        <div class="flex flex-col justify-between py-2">
+            <div>
+                <div class="flex items-center gap-3 text-xs font-semibold text-gray-400 tracking-wider uppercase mb-3">
+                    <span id="item-date">---</span>
+                </div>
+                <h1 id="item-title" class="text-3xl font-bold text-gray-900 tracking-tight mb-4">Loading Title...</h1>
+                <div id="item-price" class="text-4xl font-extrabold text-indigo-600 mb-6">---</div>
+
+                <hr class="border-gray-100 my-6">
+
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Description</h3>
+                <p id="item-desc" class="text-gray-600 leading-relaxed whitespace-pre-wrap">Loading extended information panel data metrics...</p>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    const API_BASE = "http://localhost:8080";
+    const urlParams = new URLSearchParams(window.location.search);
+    const itemId = urlParams.get('id');
+
+    async function loadItem() {
+        if (!itemId) {
+            alert("Missing parameters inside address tracking strings.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/items/${itemId}`);
+            if(!response.ok) throw new Error("Entity index matching failed");
+            const item = await response.json();
+
+            document.getElementById('item-title').innerText = item.name;
+            document.getElementById('item-price').innerText = `${parseFloat(item.price).toLocaleString()}$`;
+            document.getElementById('item-desc').innerText = item.description;
+
+            // Formatted Timestamp structure adjustment
+            const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('item-date').innerText = new Date(item.submissionTime).toLocaleDateString('en-CA', dateOptions).replace(',', '');
+
+            const img = document.getElementById('item-photo');
+            img.src = item.photoUrl ? `${API_BASE}${item.photoUrl}` : 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80';
+            img.classList.remove('opacity-0');
+
+        } catch (error) {
+            console.error("Resource acquisition exception:", error);
+            document.getElementById('item-title').innerText = "Listing Not Found";
+        }
+    }
+
+    loadItem();
+</script>
+</body>
+</html>

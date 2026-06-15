@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eMarketplace - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-column justify-between text-gray-800">
+
+<nav class="bg-white border-b border-gray-100 sticky top-0 z-50 backdrop-blur-md bg-white/90">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        <a href="index.html" class="text-2xl font-bold tracking-tight text-indigo-600 italic">eMarketplace</a>
+        <a href="new-item.html" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl transition duration-200 shadow-sm shadow-indigo-100 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            New Listing
+        </a>
+    </div>
+</nav>
+
+<main class="max-w-6xl mx-auto px-4 py-10 w-full grow">
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Explore Items</h1>
+            <p id="total-count" class="text-sm text-gray-500 mt-1">Loading listings...</p>
+        </div>
+    </div>
+
+    <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    </div>
+
+    <div class="mt-12 flex items-center justify-center gap-4">
+        <button id="prev-btn" class="p-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-white transition" disabled>
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <span id="page-indicator" class="text-sm font-semibold bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl">Page 1</span>
+        <button id="next-btn" class="p-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-white transition">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+    </div>
+</main>
+
+<script>
+    const API_BASE = "http://localhost:8080";
+    let currentPage = 0;
+
+    async function fetchItems(page) {
+        try {
+            const response = await fetch(`${API_BASE}/items?page=${page}`);
+            const data = await response.json();
+
+            document.getElementById('total-count').innerText = `${data.totalElements} items listed in total`;
+            renderGrid(data.content);
+
+            // Update Pagination states
+            currentPage = page;
+            document.getElementById('page-indicator').innerText = `Page ${page + 1}`;
+            document.getElementById('prev-btn').disabled = data.first;
+            document.getElementById('next-btn').disabled = data.last;
+        } catch (error) {
+            console.error("Error fetching items:", error);
+        }
+    }
+
+    function renderGrid(items) {
+        const grid = document.getElementById('items-grid');
+        grid.innerHTML = '';
+
+        if(items.length === 0) {
+            grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">No listings found. Be the first to add one!</div>`;
+            return;
+        }
+
+        items.forEach(item => {
+            const imgUrl = item.photoUrl ? `${API_BASE}${item.photoUrl}` : 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=600&q=80';
+            const card = `
+                <a href="item.html?id=${item.id}" class="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 flex flex-col h-full">
+                    <div class="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+                        <img src="${imgUrl}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    </div>
+                    <div class="p-5 flex flex-col justify-between grow">
+                        <div>
+                            <h3 class="font-semibold text-lg text-gray-900 group-hover:text-indigo-600 transition tracking-tight">${item.name}</h3>
+                        </div>
+                        <div class="mt-4 flex items-baseline justify-between">
+                            <span class="text-xl font-bold text-gray-900">${parseFloat(item.price).toLocaleString()}$</span>
+                        </div>
+                    </div>
+                </a>
+            `;
+            grid.innerHTML += card;
+        });
+    }
+
+    document.getElementById('prev-btn').addEventListener('click', () => { if(currentPage > 0) fetchItems(currentPage - 1); });
+    document.getElementById('next-btn').addEventListener('click', () => fetchItems(currentPage + 1));
+
+    // Start Initial Load
+    fetchItems(0);
+</script>
+</body>
+</html>
