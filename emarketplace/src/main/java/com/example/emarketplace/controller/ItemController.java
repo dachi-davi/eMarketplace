@@ -21,8 +21,9 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<Page<ItemResponse>> getItems(
-            @RequestParam(defaultValue = "0") int page) {
-        return ResponseEntity.ok(itemService.getItems(page, 6));
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "dateDesc") String sort) { // Added sort parameter
+        return ResponseEntity.ok(itemService.getItems(page, 6, sort));
     }
 
     @GetMapping("/{id}")

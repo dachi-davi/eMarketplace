@@ -12,4 +12,5 @@ public class ItemResponse {
     private String description;
     private LocalDateTime submissionTime;
     private String photoUrl;
+    private String username;
 }

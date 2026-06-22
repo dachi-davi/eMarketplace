@@ -61,6 +61,7 @@
 </main>
 
 <script>
+
     // Cosmetic listener to show selected file name
     document.getElementById('photo-input').addEventListener('change', (e) => {
         const fileName = e.target.files[0]?.name || "Click to upload file image";
@@ -69,22 +70,23 @@
 
     document.getElementById('item-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+
+
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) return alert("You must be logged in to post an item!");
+
         const formData = new FormData(e.target);
+
+        formData.append("userId", user.id);
 
         try {
             const response = await fetch('http://localhost:8080/items', {
                 method: 'POST',
                 body: formData
             });
-
-            if (response.ok) {
-                window.location.href = 'index.html';
-            } else {
-                alert('Server rejected submission. Ensure image size doesn\'t exceed 5MB.');
-            }
+            if (response.ok) window.location.href = 'index.html';
         } catch (error) {
-            console.error('Error posting form content:', error);
-            alert('Could not establish contact with backend engine.');
+            console.error(error);
         }
     });
 </script>

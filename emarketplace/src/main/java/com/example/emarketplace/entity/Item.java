@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 @Data
 public class Item {
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
