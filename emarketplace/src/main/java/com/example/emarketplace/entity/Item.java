@@ -30,4 +30,8 @@ public class Item {
     private LocalDateTime submissionTime;
 
     private String photoUrl;
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }
